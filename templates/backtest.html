@@ -4,27 +4,27 @@
 <title>{{ title }}</title>
 
 <div class="container-fluid">
-    <h1>Backtest Portfolio Asset Allocation</h1>
+    <h1>Future Backtest Portfolio Asset Allocation</h1>
 
     <div class="card my-3 page-header">
-        <div class="card-header bg-gradient fw-bold text-white text-bg-primary"><h2>Portfolio Backtesting Overview</h2>
+        <div class="card-header bg-gradient fw-bold text-white text-bg-primary">
+            <h2>Future Backtest Overview</h2>
         </div>
         <div class="card-body">
-            <p>This portfolio backtesting tool allows you to construct one or more portfolios based on the selected
-                mutual funds, ETFs, and stocks. You can analyze and backtest portfolio returns, risk characteristics,
-                style exposures, and drawdowns. The results cover both returns and fund fundamentals based portfolio
-                style analysis along with risk and return decomposition by each portfolio asset. You can compare up to
-                three different portfolios against the selected benchmark, and you can also specify any periodic
-                contribution or withdrawal cashflows and the preferred portfolio rebalancing strategy. </p>
-            <p>The related <a href="backtest-asset-class-allocation">asset class level portfolio modeling tool</a>
-                allows you to analyze and compare asset class level portfolios with a longer time horizon starting from
-                1972.</p>
+            <p>先物をバックテストします。</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Portfolio Model Configuration</h3>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Submit">
+            </form>
         </div>
     </div>
 </div>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit">
-</form>
