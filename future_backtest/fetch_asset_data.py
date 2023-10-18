@@ -6,7 +6,7 @@ import yfinance as yf
 from dateutil.relativedelta import relativedelta
 
 
-def get_youngest_ipo_date(tickers) -> date:
+def get_youngest_ipo_date(tickers: list) -> date:
     """
     複数銘柄のうちで市場公開日が最も若い銘柄の次の月の1日を返す
 
@@ -97,28 +97,29 @@ def plot_chart(asset):
     plt.show()
 
 
-if __name__ == "__main__":
-    initial_amount = 10_000  # USD
+def fetch_asset_amount(initial_amount: int, tickers: dict[str, dict[str, float]]):
+    """
+    初期投資額と銘柄の割合から、各銘柄の資産額を計算する
+    :param initial_amount: 初期投資額
+    :param tickers: 銘柄
+    """
 
+    trimmed_ticker = {ticker: data for ticker, data in tickers.items() if ticker}
+    youngest_ipo_date = get_youngest_ipo_date(list(trimmed_ticker.keys()))
+    closing_prices = fetch_closing_prices(tickers=trimmed_ticker, start_date=youngest_ipo_date, end_date=date.today())
+    asset_units = calculate_asset_units(trimmed_ticker, initial_amount, closing_prices)
+    asset_amount = calculate_asset_amount(asset_units, closing_prices)
+    return asset_amount
+
+
+if __name__ == "__main__":
     ticker_dict = {
         "SPY": {"ratio": 60.0, "unit": None},
-        "TLT": {"ratio": 40.0, "unit": None}
-        # "": {"ratio": 0.0, "unit": None}
+        "TLT": {"ratio": 40.0, "unit": None},
+        "": {"ratio": 0.0, "unit": None}  # 不正データテスト用
     }
-    trimmed_ticker_dict = {ticker: data for ticker, data in ticker_dict.items() if ticker}
-
-    ticker_list = list(ticker_dict.keys())
-    trimmed_tickers = [ticker for ticker in ticker_list if ticker != ""]
-
-    youngest_ipo_date = get_youngest_ipo_date(trimmed_tickers)
-
-    closing_prices = fetch_closing_prices(tickers=ticker_dict, start_date=youngest_ipo_date, end_date=date.today())
-
-    asset_units = calculate_asset_units(trimmed_ticker_dict, initial_amount, closing_prices)
-    asset_amount = calculate_asset_amount(asset_units, closing_prices)
-
-    plot_chart(asset_amount)
+    amount = fetch_asset_amount(10_000, ticker_dict)
+    plot_chart(amount)
 
     print(ticker_dict)
-    print(closing_prices.tail())
-    print(asset_amount.tail())
+    print(amount.tail())
