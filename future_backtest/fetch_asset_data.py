@@ -6,7 +6,7 @@ import yfinance as yf
 from dateutil.relativedelta import relativedelta
 
 
-def get_youngest_ipo_date(tickers: list) -> date:
+def _get_youngest_ipo_date(tickers: list) -> date:
     """
     複数銘柄のうちで市場公開日が最も若い銘柄の次の月の1日を返す
 
@@ -24,7 +24,7 @@ def get_youngest_ipo_date(tickers: list) -> date:
     return max(trading_start_days)
 
 
-def fetch_closing_prices(tickers: dict[str:float], start_date: date, end_date: date, interval: str = "1mo"):
+def _fetch_closing_prices(tickers: dict[str:float], start_date: date, end_date: date, interval: str = "1mo"):
     """
     銘柄の終値を取得
 
@@ -39,12 +39,12 @@ def fetch_closing_prices(tickers: dict[str:float], start_date: date, end_date: d
     return asset_data_frame
 
 
-def calculate_asset_units(ticker_data, amount, prices):
+def _calculate_asset_units(ticker_data, initial_amount, prices):
     """
     初期投資額と各銘柄の割合から、銘柄ごとの購入可能単位数を計算する
 
     :param ticker_data: {銘柄名: {"ratio": 割合}} 形式の辞書
-    :param amount: 初期投資額
+    :param initial_amount: 初期投資額
     :param prices: 銘柄の終値データ。Pandas DataFrame オブジェクト
     :return: {"ratio": 割合, "unit": 単位数} 形式に更新された ticker_data
     """
@@ -52,12 +52,12 @@ def calculate_asset_units(ticker_data, amount, prices):
     for ticker, data in ticker_data.items():
         ratio = data["ratio"]
         price = prices[ticker].iloc[0]
-        data["unit"] = int((amount * ratio) / 100 / price)
+        data["unit"] = int((initial_amount * ratio) / 100 / price)
 
     return ticker_data
 
 
-def calculate_asset_amount(ticker_data, prices):
+def _calculate_asset_amount(ticker_data, prices):
     """
     銘柄ごとの購入可能単位数と各銘柄の終値データから、各銘柄の資産額を計算する
 
@@ -75,7 +75,7 @@ def calculate_asset_amount(ticker_data, prices):
     return tickers_amount
 
 
-def plot_chart(asset):
+def _plot_chart(asset):
     """
     資産額のチャートを描画する
 
@@ -105,10 +105,10 @@ def fetch_asset_amount(initial_amount: int, tickers: dict[str, dict[str, float]]
     """
 
     trimmed_ticker = {ticker: data for ticker, data in tickers.items() if ticker}
-    youngest_ipo_date = get_youngest_ipo_date(list(trimmed_ticker.keys()))
-    closing_prices = fetch_closing_prices(tickers=trimmed_ticker, start_date=youngest_ipo_date, end_date=date.today())
-    asset_units = calculate_asset_units(trimmed_ticker, initial_amount, closing_prices)
-    asset_amount = calculate_asset_amount(asset_units, closing_prices)
+    youngest_ipo_date = _get_youngest_ipo_date(list(trimmed_ticker.keys()))
+    closing_prices = _fetch_closing_prices(tickers=trimmed_ticker, start_date=youngest_ipo_date, end_date=date.today())
+    asset_units = _calculate_asset_units(trimmed_ticker, initial_amount, closing_prices)
+    asset_amount = _calculate_asset_amount(asset_units, closing_prices)
     return asset_amount
 
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         "": {"ratio": 0.0, "unit": None}  # 不正データテスト用
     }
     amount = fetch_asset_amount(10_000, ticker_dict)
-    plot_chart(amount)
+    _plot_chart(amount)
 
     print(ticker_dict)
     print(amount.tail())
