@@ -53,7 +53,6 @@ def _calculate_asset_units(ticker_data, initial_amount, prices):
         ratio = data["ratio"]
         price = prices[ticker].iloc[0]
         data["unit"] = int((initial_amount * ratio) / 100 / price)
-
     return ticker_data
 
 
@@ -69,9 +68,7 @@ def _calculate_asset_amount(ticker_data, prices):
     tickers_amount = prices.copy()
     for ticker, data in ticker_data.items():
         tickers_amount[ticker] = tickers_amount[ticker] * data["unit"]
-
     tickers_amount["Total"] = tickers_amount.sum(axis=1)
-
     return tickers_amount
 
 
@@ -91,9 +88,7 @@ def _plot_chart(asset):
     plt.xlabel("Date")
     plt.ylabel("Price")
     plt.legend()
-
     plt.gca().yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, p: format(int(x), ',')))
-
     plt.show()
 
 
@@ -104,10 +99,10 @@ def fetch_asset_amount(initial_amount: int, tickers: dict[str, dict[str, float]]
     :param tickers: 銘柄
     """
 
-    trimmed_ticker = {ticker: data for ticker, data in tickers.items() if ticker}
-    youngest_ipo_date = _get_youngest_ipo_date(list(trimmed_ticker.keys()))
-    closing_prices = _fetch_closing_prices(tickers=trimmed_ticker, start_date=youngest_ipo_date, end_date=date.today())
-    asset_units = _calculate_asset_units(trimmed_ticker, initial_amount, closing_prices)
+    trimmed_tickers = {ticker: data for ticker, data in tickers.items() if ticker}
+    youngest_ipo_date = _get_youngest_ipo_date(list(trimmed_tickers.keys()))
+    closing_prices = _fetch_closing_prices(tickers=trimmed_tickers, start_date=youngest_ipo_date, end_date=date.today())
+    asset_units = _calculate_asset_units(trimmed_tickers, initial_amount, closing_prices)
     asset_amount = _calculate_asset_amount(asset_units, closing_prices)
     return asset_amount
 
